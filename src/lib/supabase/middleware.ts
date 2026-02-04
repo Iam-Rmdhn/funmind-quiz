@@ -34,7 +34,7 @@ export async function updateSession(request: NextRequest) {
 
   // Protected routes - redirect to login if not authenticated
   const protectedRoutes = ['/dashboard', '/quiz', '/history'];
-  const isProtectedRoute = protectedRoutes.some(route => 
+  const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );
 
@@ -46,9 +46,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect authenticated users away from auth pages
   const authRoutes = ['/login', '/signup', '/'];
-  const isAuthRoute = authRoutes.some(route => 
-    request.nextUrl.pathname === route
-  );
+  const isAuthRoute = authRoutes.some((route) => request.nextUrl.pathname === route);
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone();

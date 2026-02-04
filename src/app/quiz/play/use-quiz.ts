@@ -58,7 +58,7 @@ export interface UseQuizReturn {
   currentQuestion: QuizQuestion | null;
   earnedXP: number;
   isResumed: boolean;
-  
+
   // Actions
   handleAnswerClick: (selectedLabel: string) => void;
   getOptionStyle: (option: QuizOption) => string;
@@ -70,32 +70,45 @@ export interface UseQuizReturn {
 const MULTIPLE_CHOICE_COLORS = ['bg-[#fef08a]', 'bg-[#fca5a5]', 'bg-[#86efac]', 'bg-[#fdba74]'];
 const BOOLEAN_COLORS = ['bg-[#86efac]', 'bg-[#fca5a5]'];
 
-export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused }: UseQuizParams): UseQuizReturn {
+export function useQuiz({
+  categoryId,
+  difficulty,
+  amount,
+  resumeSession,
+  paused,
+}: UseQuizParams): UseQuizReturn {
   // total duration based on question count
   const getTotalTime = (questionCount: number): number => {
     switch (questionCount) {
-      case 5: return 3 * 60;  
-      case 10: return 7 * 60;  
-      case 15: return 12 * 60;
-      case 20: return 15 * 60;
-      default: return questionCount * 45;
+      case 5:
+        return 3 * 60;
+      case 10:
+        return 7 * 60;
+      case 15:
+        return 12 * 60;
+      case 20:
+        return 15 * 60;
+      default:
+        return questionCount * 45;
     }
   };
 
   // Initialize state from resume session if available
   const [questions, setQuestions] = useState<QuizQuestion[]>(resumeSession?.questions || []);
   const [currentIndex, setCurrentIndex] = useState(resumeSession?.currentIndex || 0);
-  const [timeLeft, setTimeLeft] = useState(resumeSession?.timeLeft || getTotalTime(parseInt(amount))); 
+  const [timeLeft, setTimeLeft] = useState(
+    resumeSession?.timeLeft || getTotalTime(parseInt(amount))
+  );
   const [loading, setLoading] = useState(!resumeSession);
   const [score, setScore] = useState(resumeSession?.score || 0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
-  
+
   // Derived state for isResumed (only show if we haven't advanced past the resumed point)
   const isResumed = !!resumeSession && currentIndex === resumeSession.currentIndex;
-  
+
   const startedAt = useRef(resumeSession?.startedAt || new Date().toISOString());
 
   // Calculate earned XP (derived from score and difficulty)
@@ -119,7 +132,17 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
         startedAt: startedAt.current,
       });
     }
-  }, [questions, currentIndex, score, timeLeft, isQuizFinished, isAnswered, categoryId, difficulty, amount]);
+  }, [
+    questions,
+    currentIndex,
+    score,
+    timeLeft,
+    isQuizFinished,
+    isAnswered,
+    categoryId,
+    difficulty,
+    amount,
+  ]);
 
   // Save session on page unload/hide and track page visibility for timer
   useEffect(() => {
@@ -129,7 +152,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
 
     // Desktop: beforeunload fires when closing tab/window
     window.addEventListener('beforeunload', handleSaveSession);
-    
+
     // Mobile/Desktop: visibilitychange fires when switching apps or tabs
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
@@ -140,10 +163,10 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     // Mobile: pagehide is more reliable than beforeunload on iOS Safari
     window.addEventListener('pagehide', handleSaveSession);
-    
+
     // Additional: blur/focus events for when user taps outside the browser
     const handleBlur = () => {
       saveCurrentSession();
@@ -167,7 +190,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   // Also save periodically (every 5 seconds)
   useEffect(() => {
     if (loading || isQuizFinished) return;
-    
+
     const interval = setInterval(() => {
       saveCurrentSession();
     }, 5000);
@@ -192,29 +215,32 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
           return url;
         };
 
-        const fetchWithRetry = async (url: string, retries = 2): Promise<{ response_code: number; results?: OpenTDBQuestion[] }> => {
+        const fetchWithRetry = async (
+          url: string,
+          retries = 2
+        ): Promise<{ response_code: number; results?: OpenTDBQuestion[] }> => {
           try {
             const res = await fetch(url);
-            
+
             if (res.status === 429) {
               if (retries > 0) {
-                await new Promise(r => setTimeout(r, 2000));
+                await new Promise((r) => setTimeout(r, 2000));
                 return fetchWithRetry(url, retries - 1);
               }
             }
-            
+
             const data = await res.json();
-            
+
             // Handle OpenTDB Rate Limit Code (5)
             if (data.response_code === 5 && retries > 0) {
-              await new Promise(r => setTimeout(r, 2000));
+              await new Promise((r) => setTimeout(r, 2000));
               return fetchWithRetry(url, retries - 1);
             }
 
             return data;
           } catch (err) {
             if (retries > 0) {
-              await new Promise(r => setTimeout(r, 1000));
+              await new Promise((r) => setTimeout(r, 1000));
               return fetchWithRetry(url, retries - 1);
             }
             throw err;
@@ -226,14 +252,16 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
 
         // Fallback Strategy: If no results (Code 1), try removing difficulty constraint
         if (data.response_code === 1 && difficulty) {
-          console.log("Not enough questions for specific difficulty, falling back to any difficulty...");
+          console.log(
+            'Not enough questions for specific difficulty, falling back to any difficulty...'
+          );
           data = await fetchWithRetry(buildUrl(null));
         }
 
         if (!isMounted) return;
 
         if (!data.results || !Array.isArray(data.results) || data.results.length === 0) {
-          console.error("No questions returned from API", data);
+          console.error('No questions returned from API', data);
           setLoading(false);
           return;
         }
@@ -250,14 +278,19 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
             allOptions = allOptions.sort(() => Math.random() - 0.5);
             colors = MULTIPLE_CHOICE_COLORS;
           }
-          
+
           return {
             ...q,
             options: allOptions.map((opt: string, index: number) => ({
-              id: q.type === 'boolean' ? (opt === 'True' ? 'T' : 'F') : String.fromCharCode(65 + index),
+              id:
+                q.type === 'boolean'
+                  ? opt === 'True'
+                    ? 'T'
+                    : 'F'
+                  : String.fromCharCode(65 + index),
               label: opt,
-              color: colors[index] || 'bg-white'
-            }))
+              color: colors[index] || 'bg-white',
+            })),
           };
         });
 
@@ -269,14 +302,16 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
         }
       } catch (error) {
         if (isMounted) {
-          console.error("Failed to fetch questions:", error);
+          console.error('Failed to fetch questions:', error);
           setLoading(false);
         }
       }
     }
     fetchQuestions();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [amount, categoryId, difficulty, resumeSession]);
 
   // Handle advancing to next question
@@ -295,7 +330,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   useEffect(() => {
     // Only run timer if page is visible, not paused, not loading, and not finished
     if (!isPageVisible || paused || loading || isQuizFinished) return;
-    
+
     const timer = setInterval(() => {
       setTimeLeft((prev: number) => {
         if (prev <= 1) {
@@ -305,7 +340,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, [isPageVisible, paused, loading, isQuizFinished]);
 
@@ -314,14 +349,14 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   useEffect(() => {
     if (isQuizFinished && questions.length > 0 && !hasSavedResult.current) {
       hasSavedResult.current = true;
-      
+
       // Clear the saved session since quiz is complete
       clearQuizSession();
-      
+
       // Determine quiz type
-      const types = new Set(questions.map(q => q.type));
-      const quizType = types.size > 1 ? 'mixed' : (types.has('boolean') ? 'boolean' : 'multiple');
-      
+      const types = new Set(questions.map((q) => q.type));
+      const quizType = types.size > 1 ? 'mixed' : types.has('boolean') ? 'boolean' : 'multiple';
+
       saveQuizResult({
         category: questions[0].category,
         categoryId: categoryId,
@@ -345,7 +380,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   // Decode HTML entities
   const decodeHtml = (html: string): string => {
     if (typeof window === 'undefined') return html;
-    const txt = document.createElement("textarea");
+    const txt = document.createElement('textarea');
     txt.innerHTML = html;
     return txt.value;
   };
@@ -353,7 +388,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   // Handle answer selection
   const handleAnswerClick = (selectedLabel: string) => {
     if (isAnswered) return;
-    
+
     setSelectedAnswer(selectedLabel);
     setIsAnswered(true);
 
@@ -423,7 +458,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
     currentQuestion,
     earnedXP,
     isResumed,
-    
+
     // Actions
     handleAnswerClick,
     getOptionStyle,

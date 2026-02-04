@@ -31,13 +31,12 @@ export default function QuizSelectPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        
+      <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link 
-            href="/dashboard" 
-            className="flex items-center gap-2 rounded-full border-[3px] border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_#000] hover:-translate-y-0.5 transition-transform"
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 rounded-full border-[3px] border-black bg-white px-4 py-2 font-bold shadow-[4px_4px_0_#000] transition-transform hover:-translate-y-0.5"
           >
             <span className="material-symbols-rounded">arrow_back</span>
             Back
@@ -48,32 +47,38 @@ export default function QuizSelectPage() {
 
         {/* Step 1: Category Selection */}
         <div className="mb-10">
-          <h2 className="text-2xl font-black mb-4 flex items-center gap-2 text-black">
-            <span className="flex items-center justify-center size-10 rounded-full bg-accent text-black font-black text-lg border-2 border-black">1</span>
+          <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-black">
+            <span className="bg-accent flex size-10 items-center justify-center rounded-full border-2 border-black text-lg font-black text-black">
+              1
+            </span>
             Select Category
           </h2>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {QUIZ_CATEGORIES.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category)}
-                className={`group relative flex flex-col items-center gap-2 p-4 rounded-2xl border-[3px] border-black transition-all cursor-pointer
-                  ${selectedCategory?.id === category.id 
-                    ? 'bg-primary shadow-[2px_2px_0_#000] -translate-y-1' 
+                className={`group relative flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-[3px] border-black p-4 transition-all ${
+                  selectedCategory?.id === category.id
+                    ? 'bg-primary -translate-y-1 shadow-[2px_2px_0_#000]'
                     : 'bg-white shadow-[4px_4px_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_#000]'
-                  }`}
+                }`}
               >
-                <div className={`size-12 rounded-xl ${category.bgColor} flex items-center justify-center border-2 border-black`}>
-                  <span className={`material-symbols-rounded text-2xl ${category.color}`}>{category.icon}</span>
+                <div
+                  className={`size-12 rounded-xl ${category.bgColor} flex items-center justify-center border-2 border-black`}
+                >
+                  <span className={`material-symbols-rounded text-2xl ${category.color}`}>
+                    {category.icon}
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-center leading-tight text-gray-800 line-clamp-2">
+                <span className="line-clamp-2 text-center text-xs leading-tight font-bold text-gray-800">
                   {category.name.replace('Entertainment: ', '').replace('Science: ', '')}
                 </span>
-                
+
                 {selectedCategory?.id === category.id && (
-                  <div className="absolute -top-2 -right-2 size-6 rounded-full bg-green-500 border-2 border-black flex items-center justify-center">
-                    <span className="material-symbols-rounded text-white text-sm">check</span>
+                  <div className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border-2 border-black bg-green-500">
+                    <span className="material-symbols-rounded text-sm text-white">check</span>
                   </div>
                 )}
               </button>
@@ -83,33 +88,36 @@ export default function QuizSelectPage() {
 
         {/* Step 2: Difficulty Selection */}
         <div className="mb-10">
-          <h2 className="text-2xl font-black mb-4 flex items-center gap-2 text-black">
-            <span className="flex items-center justify-center size-10 rounded-full bg-secondary text-white font-black text-lg border-2 border-black">2</span>
-            Select Difficulty <span className="text-gray-400 font-normal text-base">(Optional)</span>
+          <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-black">
+            <span className="bg-secondary flex size-10 items-center justify-center rounded-full border-2 border-black text-lg font-black text-white">
+              2
+            </span>
+            Select Difficulty{' '}
+            <span className="text-base font-normal text-gray-400">(Optional)</span>
           </h2>
-          
+
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setSelectedDifficulty('')}
-              className={`flex items-center gap-3 px-6 py-3 rounded-2xl border-[3px] border-black transition-all cursor-pointer
-                ${selectedDifficulty === '' 
-                  ? 'bg-accent shadow-[2px_2px_0_#000]' 
+              className={`flex cursor-pointer items-center gap-3 rounded-2xl border-[3px] border-black px-6 py-3 transition-all ${
+                selectedDifficulty === ''
+                  ? 'bg-accent shadow-[2px_2px_0_#000]'
                   : 'bg-white shadow-[4px_4px_0_#000] hover:-translate-y-1'
-                }`}
+              }`}
             >
               <span className="material-symbols-rounded text-gray-500">shuffle</span>
               <span className="font-bold text-black">Any</span>
             </button>
-            
+
             {DIFFICULTY_LEVELS.map((diff) => (
               <button
                 key={diff.id}
                 onClick={() => setSelectedDifficulty(diff.id)}
-                className={`flex items-center gap-3 px-6 py-3 rounded-2xl border-[3px] border-black transition-all cursor-pointer
-                  ${selectedDifficulty === diff.id 
-                    ? 'bg-accent shadow-[2px_2px_0_#000]' 
+                className={`flex cursor-pointer items-center gap-3 rounded-2xl border-[3px] border-black px-6 py-3 transition-all ${
+                  selectedDifficulty === diff.id
+                    ? 'bg-accent shadow-[2px_2px_0_#000]'
                     : 'bg-white shadow-[4px_4px_0_#000] hover:-translate-y-1'
-                  }`}
+                }`}
               >
                 <span className={`material-symbols-rounded ${diff.color}`}>{diff.icon}</span>
                 <span className="font-bold text-black">{diff.name}</span>
@@ -120,21 +128,23 @@ export default function QuizSelectPage() {
 
         {/* Step 3: Question Count */}
         <div className="mb-10">
-          <h2 className="text-2xl font-black mb-4 flex items-center gap-2 text-black">
-            <span className="flex items-center justify-center size-10 rounded-full bg-[#e9d5ff] text-black font-black text-lg border-2 border-black">3</span>
+          <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-black">
+            <span className="flex size-10 items-center justify-center rounded-full border-2 border-black bg-[#e9d5ff] text-lg font-black text-black">
+              3
+            </span>
             Number of Questions
           </h2>
-          
+
           <div className="flex flex-wrap gap-3">
             {[5, 10, 15, 20, 25].map((count) => (
               <button
                 key={count}
                 onClick={() => setQuestionCount(count)}
-                className={`flex items-center justify-center size-16 rounded-2xl border-[3px] border-black font-black text-xl transition-all cursor-pointer
-                  ${questionCount === count 
-                    ? 'bg-accent shadow-[2px_2px_0_#000]' 
+                className={`flex size-16 cursor-pointer items-center justify-center rounded-2xl border-[3px] border-black text-xl font-black transition-all ${
+                  questionCount === count
+                    ? 'bg-accent shadow-[2px_2px_0_#000]'
                     : 'bg-white shadow-[4px_4px_0_#000] hover:-translate-y-1'
-                  }`}
+                }`}
               >
                 {count}
               </button>
@@ -147,11 +157,11 @@ export default function QuizSelectPage() {
           <button
             onClick={handleStartQuiz}
             disabled={!selectedCategory}
-            className={`flex items-center gap-3 px-10 py-4 rounded-full border-[3px] border-black font-black text-xl transition-all
-              ${selectedCategory 
-                ? 'bg-primary shadow-[6px_6px_0_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0_#000] cursor-pointer' 
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-              }`}
+            className={`flex items-center gap-3 rounded-full border-[3px] border-black px-10 py-4 text-xl font-black transition-all ${
+              selectedCategory
+                ? 'bg-primary cursor-pointer shadow-[6px_6px_0_#000] hover:-translate-y-1 hover:shadow-[8px_8px_0_#000]'
+                : 'cursor-not-allowed bg-gray-200 text-gray-400 shadow-none'
+            }`}
           >
             <span className="material-symbols-rounded text-2xl">play_arrow</span>
             Start Quiz
@@ -160,16 +170,21 @@ export default function QuizSelectPage() {
 
         {/* Selected Summary */}
         {selectedCategory && (
-          <div className="mt-8 p-6 rounded-3xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] max-w-md mx-auto">
-            <h3 className="font-black text-lg mb-3 text-black">Your Quiz Settings:</h3>
+          <div className="mx-auto mt-8 max-w-md rounded-3xl border-[3px] border-black bg-white p-6 shadow-[4px_4px_0_#000]">
+            <h3 className="mb-3 text-lg font-black text-black">Your Quiz Settings:</h3>
             <div className="space-y-2 text-gray-700">
-              <p><span className="font-bold">Category:</span> {selectedCategory.name}</p>
-              <p><span className="font-bold">Difficulty:</span> {selectedDifficulty || 'Any'}</p>
-              <p><span className="font-bold">Questions:</span> {questionCount}</p>
+              <p>
+                <span className="font-bold">Category:</span> {selectedCategory.name}
+              </p>
+              <p>
+                <span className="font-bold">Difficulty:</span> {selectedDifficulty || 'Any'}
+              </p>
+              <p>
+                <span className="font-bold">Questions:</span> {questionCount}
+              </p>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

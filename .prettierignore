@@ -1,0 +1,14 @@
+.next
+node_modules
+dist
+build
+.cache
+public
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+package-lock.json
+bun.lockb
+*.log

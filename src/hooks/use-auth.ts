@@ -1,32 +1,34 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export interface UserProfile {
-  id: string
-  username: string
-  email: string | null
-  avatar_url: string | null
-  total_xp: number
-  level: number
-  created_at: string
-  updated_at: string
+  id: string;
+  username: string;
+  email: string | null;
+  avatar_url: string | null;
+  total_xp: number;
+  level: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient()
+    const supabase = createClient();
 
     // Get initial user
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
 
       if (user) {
         // Fetch profile
@@ -34,63 +36,60 @@ export function useAuth() {
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single()
+          .single();
 
-        setProfile(profileData)
+        setProfile(profileData);
       }
 
-      setLoading(false)
+      setLoading(false);
     }
 
-    getUser()
+    getUser();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
 
-        if (session?.user) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
+      if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-          setProfile(profileData)
-        } else {
-          setProfile(null)
-        }
+        setProfile(profileData);
+      } else {
+        setProfile(null);
       }
-    )
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
     if (typeof window !== 'undefined') {
-      window.localStorage.removeItem('user_xp')
+      window.localStorage.removeItem('user_xp');
     }
-  }
+  };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return { error: 'Not authenticated' }
+    if (!user) return { error: 'Not authenticated' };
 
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+    const supabase = createClient();
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
 
     if (!error) {
-      setProfile(prev => prev ? { ...prev, ...updates } : null)
+      setProfile((prev) => (prev ? { ...prev, ...updates } : null));
     }
 
-    return { error: error?.message }
-  }
+    return { error: error?.message };
+  };
 
   return {
     user,
@@ -99,5 +98,5 @@ export function useAuth() {
     signOut,
     updateProfile,
     isAuthenticated: !!user,
-  }
+  };
 }

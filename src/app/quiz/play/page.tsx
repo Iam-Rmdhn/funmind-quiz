@@ -19,22 +19,22 @@ import {
 import { Suspense } from 'react';
 
 // Separate component for the actual quiz game
-function QuizGame({ 
-  categoryId, 
-  difficulty, 
-  amount, 
-  resumeSession 
-}: { 
-  categoryId: string | null; 
-  difficulty: string | null; 
-  amount: string; 
+function QuizGame({
+  categoryId,
+  difficulty,
+  amount,
+  resumeSession,
+}: {
+  categoryId: string | null;
+  difficulty: string | null;
+  amount: string;
   resumeSession: QuizSession | null;
 }) {
   const router = useRouter();
 
-  const quizData = useQuiz({ 
-    categoryId: resumeSession?.categoryId ?? categoryId, 
-    difficulty: resumeSession?.difficulty ?? difficulty, 
+  const quizData = useQuiz({
+    categoryId: resumeSession?.categoryId ?? categoryId,
+    difficulty: resumeSession?.difficulty ?? difficulty,
     amount: resumeSession?.amount ?? amount,
     resumeSession,
     paused: false,
@@ -73,16 +73,15 @@ function QuizGame({
   const summary = getQuizSummary();
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 text-black font-sans md:p-8 flex flex-col items-center">
-      
+    <div className="flex min-h-screen flex-col items-center bg-[#f8fafc] p-4 font-sans text-black md:p-8">
       {/* Resumed Badge */}
       {isResumed && (
-        <div className="mb-4 px-4 py-2 rounded-full border-2 border-blue-500 bg-blue-100 text-blue-700 font-bold text-sm flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2 rounded-full border-2 border-blue-500 bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
           <span className="material-symbols-rounded text-lg">history</span>
           Resumed Quiz
         </div>
       )}
-      
+
       {/* Header Section */}
       <QuizHeader
         difficulty={currentQuestion.difficulty}
@@ -97,38 +96,35 @@ function QuizGame({
       <QuizProgressBar progress={progress} />
 
       {/* Main Game Area */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 md:gap-8 relative">
-        
+      <div className="relative grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-[200px_1fr] md:gap-8">
         {/* Left: Timer */}
         <QuizTimer timeLeft={timeLeft} />
 
         {/* Right: Question & Answers */}
-        <div className="flex flex-col gap-6 w-full">
-          
+        <div className="flex w-full flex-col gap-6">
           {/* Question Bubble */}
-          <QuizQuestionBubble 
-            question={currentQuestion.question} 
-            decodeHtml={decodeHtml} 
-          />
+          <QuizQuestionBubble question={currentQuestion.question} decodeHtml={decodeHtml} />
 
           {/* Answer Options Grid */}
-          <div className={`grid gap-4 mt-4 ${currentQuestion.type === 'boolean' ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}>
+          <div
+            className={`mt-4 grid gap-4 ${currentQuestion.type === 'boolean' ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'}`}
+          >
             {currentQuestion.options.map((option) => (
               <QuizAnswerOption
                 key={option.id}
                 option={option}
                 isAnswered={isAnswered}
                 isCorrectAnswer={option.label === currentQuestion.correct_answer}
-                isSelectedWrong={option.label === selectedAnswer && option.label !== currentQuestion.correct_answer}
+                isSelectedWrong={
+                  option.label === selectedAnswer && option.label !== currentQuestion.correct_answer
+                }
                 optionStyle={getOptionStyle(option)}
                 decodeHtml={decodeHtml}
                 onSelect={() => handleAnswerClick(option.label)}
               />
             ))}
           </div>
-
         </div>
-
       </div>
 
       {/* Quiz Summary Modal */}
@@ -143,14 +139,13 @@ function QuizGame({
         onGoHome={() => router.push('/dashboard')}
         onPlayAgain={() => window.location.reload()}
       />
-
     </div>
   );
 }
 
 function QuizContent() {
   const searchParams = useSearchParams();
-  
+
   // Get quiz parameters from URL
   const categoryId = searchParams.get('category');
   const difficulty = searchParams.get('difficulty');
@@ -161,7 +156,7 @@ function QuizContent() {
     if (typeof window === 'undefined') return null;
     return getQuizSession();
   });
-  
+
   // Resume state management - 'decided' means user has made a choice
   const [decision, setDecision] = useState<'pending' | 'resume' | 'fresh'>(
     savedSession ? 'pending' : 'fresh'
@@ -208,4 +203,3 @@ export default function QuizPlayPage() {
     </Suspense>
   );
 }
-

@@ -13,7 +13,7 @@ export default function SidebarNav() {
   const router = useRouter();
   const [active, setActive] = useState('home');
 
-  const handleNavClick = (item: typeof MENU_ITEMS[0]) => {
+  const handleNavClick = (item: (typeof MENU_ITEMS)[0]) => {
     setActive(item.id);
     if (item.href) {
       router.push(item.href);
@@ -21,7 +21,7 @@ export default function SidebarNav() {
   };
 
   return (
-    <aside className="h-full flex flex-col overflow-y-auto pb-6 px-4 pt-2">
+    <aside className="flex h-full flex-col overflow-y-auto px-4 pt-2 pb-6">
       {/* Navigation */}
       <nav className="flex flex-col gap-4">
         {MENU_ITEMS.map((item) => {
@@ -30,11 +30,9 @@ export default function SidebarNav() {
             <button
               key={item.id}
               onClick={() => handleNavClick(item)}
-              className={`flex w-full items-center gap-4 rounded-full border-[3px] border-black px-6 py-4 text-lg font-bold shadow-[4px_4px_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_#000] active:translate-y-0 active:shadow-none cursor-pointer
-                ${isActive 
-                  ? 'bg-accent' 
-                  : 'bg-white hover:bg-gray-50'
-                }`}
+              className={`flex w-full cursor-pointer items-center gap-4 rounded-full border-[3px] border-black px-6 py-4 text-lg font-bold shadow-[4px_4px_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_#000] active:translate-y-0 active:shadow-none ${
+                isActive ? 'bg-accent' : 'bg-white hover:bg-gray-50'
+              }`}
             >
               <span className="material-symbols-rounded text-3xl">{item.icon}</span>
               {item.name}

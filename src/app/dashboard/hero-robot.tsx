@@ -19,20 +19,17 @@ export default function HeroRobot() {
   }, []);
 
   if (!animationData) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-      </div>
-    );
+    return <div className="flex h-full w-full items-center justify-center"></div>;
   }
 
   return (
-    <div className="w-full h-full">
-      <Lottie 
-        animationData={animationData} 
-        loop={false} 
-        className="w-full h-full"
+    <div className="h-full w-full">
+      <Lottie
+        animationData={animationData}
+        loop={false}
+        className="h-full w-full"
         rendererSettings={{
-          preserveAspectRatio: 'xMaxYMin slice'
+          preserveAspectRatio: 'xMaxYMin slice',
         }}
       />
     </div>

@@ -20,7 +20,7 @@ const MAX_HISTORY_ITEMS = 50;
  */
 export function getQuizHistory(): QuizHistoryItem[] {
   if (typeof window === 'undefined') return [];
-  
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
@@ -36,20 +36,20 @@ export function getQuizHistory(): QuizHistoryItem[] {
  */
 export function saveQuizResult(result: Omit<QuizHistoryItem, 'id' | 'date'>): void {
   if (typeof window === 'undefined') return;
-  
+
   try {
     const history = getQuizHistory();
-    
+
     const newItem: QuizHistoryItem = {
       ...result,
       id: generateId(),
       date: new Date().toISOString(),
     };
-    
+
     history.unshift(newItem);
-    
+
     const trimmedHistory = history.slice(0, MAX_HISTORY_ITEMS);
-    
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));
   } catch (error) {
     console.error('Failed to save quiz result:', error);
@@ -69,10 +69,10 @@ export function clearQuizHistory(): void {
  */
 export function deleteHistoryItem(id: string): void {
   if (typeof window === 'undefined') return;
-  
+
   try {
     const history = getQuizHistory();
-    const filtered = history.filter(item => item.id !== id);
+    const filtered = history.filter((item) => item.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
   } catch (error) {
     console.error('Failed to delete history item:', error);
@@ -84,7 +84,7 @@ export function deleteHistoryItem(id: string): void {
  */
 export function getQuizStats() {
   const history = getQuizHistory();
-  
+
   if (history.length === 0) {
     return {
       totalQuizzes: 0,
@@ -95,20 +95,23 @@ export function getQuizStats() {
       favoriteCategory: null,
     };
   }
-  
+
   const totalQuizzes = history.length;
   const totalQuestions = history.reduce((sum, item) => sum + item.totalQuestions, 0);
   const totalCorrect = history.reduce((sum, item) => sum + item.correctAnswers, 0);
-  const averageScore = Math.round(history.reduce((sum, item) => sum + item.percentage, 0) / totalQuizzes);
-  const bestScore = Math.max(...history.map(item => item.percentage));
-  
+  const averageScore = Math.round(
+    history.reduce((sum, item) => sum + item.percentage, 0) / totalQuizzes
+  );
+  const bestScore = Math.max(...history.map((item) => item.percentage));
+
   // Find favorite category
   const categoryCounts: Record<string, number> = {};
-  history.forEach(item => {
+  history.forEach((item) => {
     categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
   });
-  const favoriteCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
-  
+  const favoriteCategory =
+    Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
   return {
     totalQuizzes,
     totalQuestions,
@@ -136,12 +139,12 @@ export function formatHistoryDate(dateString: string): string {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  
+
   if (diffMins < 1) return 'Just now';
   if (diffMins < 60) return `${diffMins} min ago`;
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
   if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  
+
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

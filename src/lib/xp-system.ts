@@ -29,23 +29,23 @@ export function getUserXP(): UserXP {
   if (typeof window === 'undefined') {
     return { totalXP: 0, level: 1, xpToNextLevel: 100, currentLevelXP: 0 };
   }
-  
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     const totalXP = stored ? parseInt(stored, 10) : 0;
-    
+
     // Calculate level from total XP
     let level = 1;
     let xpUsed = 0;
-    
+
     while (xpUsed + getXPForLevel(level) <= totalXP) {
       xpUsed += getXPForLevel(level);
       level++;
     }
-    
+
     const currentLevelXP = totalXP - xpUsed;
     const xpToNextLevel = getXPForLevel(level);
-    
+
     return {
       totalXP,
       level,
@@ -65,15 +65,15 @@ export function addXP(amount: number): UserXP {
   if (typeof window === 'undefined') {
     return getUserXP();
   }
-  
+
   try {
     const currentXP = getUserXP().totalXP;
     const newTotalXP = currentXP + amount;
     localStorage.setItem(STORAGE_KEY, newTotalXP.toString());
-    
+
     // Dispatch custom event for real-time updates
     window.dispatchEvent(new CustomEvent('xp-updated', { detail: { xp: newTotalXP } }));
-    
+
     return getUserXP();
   } catch (error) {
     console.error('Failed to add XP:', error);
@@ -124,30 +124,30 @@ export const xpStore = {
       if (e.key === STORAGE_KEY) callback();
     };
     window.addEventListener('storage', storageHandler);
-    
+
     return () => {
       window.removeEventListener('xp-updated', handler);
       window.removeEventListener('storage', storageHandler);
     };
   },
-  
+
   getSnapshot(): UserXP {
     if (typeof window === 'undefined') {
       return defaultXP;
     }
-    
+
     const xpObj = getUserXP();
-    
+
     // Return cached object if content hasn't changed to ensure referential stability
     if (xpCache && xpCache.totalXP === xpObj.totalXP) {
       return xpCache;
     }
-    
+
     xpCache = xpObj;
     return xpObj;
   },
-  
+
   getServerSnapshot(): UserXP {
     return defaultXP;
-  }
+  },
 };

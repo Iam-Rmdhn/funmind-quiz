@@ -2,18 +2,23 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getQuizHistory, clearQuizHistory, formatHistoryDate, getQuizStats } from '@/lib/quiz-history';
+import {
+  getQuizHistory,
+  clearQuizHistory,
+  formatHistoryDate,
+  getQuizStats,
+} from '@/lib/quiz-history';
 import type { QuizHistoryItem } from '@/lib/quiz-history';
 
 export default function HistoryPage() {
   const router = useRouter();
-  
+
   // Use lazy initialization to load data from localStorage
   const [history, setHistory] = useState<QuizHistoryItem[]>(() => {
     if (typeof window === 'undefined') return [];
     return getQuizHistory();
   });
-  
+
   const [stats, setStats] = useState(() => {
     if (typeof window === 'undefined') return getQuizStats();
     return getQuizStats();
@@ -36,35 +41,39 @@ export default function HistoryPage() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
-      case 'easy': return 'bg-green-200';
-      case 'medium': return 'bg-yellow-200';
-      case 'hard': return 'bg-red-200';
-      default: return 'bg-gray-200';
+      case 'easy':
+        return 'bg-green-200';
+      case 'medium':
+        return 'bg-yellow-200';
+      case 'hard':
+        return 'bg-red-200';
+      default:
+        return 'bg-gray-200';
     }
   };
 
   return (
     <div className="min-h-screen bg-[#e0f5ea] p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center justify-center size-12 rounded-xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_#000] transition-all cursor-pointer"
+              className="flex size-12 cursor-pointer items-center justify-center rounded-xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_#000]"
             >
               <span className="material-symbols-rounded">arrow_back</span>
             </button>
             <div>
               <h1 className="text-3xl font-black text-black">Quiz History</h1>
-              <p className="text-gray-600 font-medium">Your recent quiz results</p>
+              <p className="font-medium text-gray-600">Your recent quiz results</p>
             </div>
           </div>
 
           {history.length > 0 && (
             <button
               onClick={handleClearHistory}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border-[3px] border-black bg-red-100 text-red-700 font-bold shadow-[3px_3px_0_#000] hover:-translate-y-1 transition-all cursor-pointer"
+              className="flex cursor-pointer items-center gap-2 rounded-xl border-[3px] border-black bg-red-100 px-4 py-2 font-bold text-red-700 shadow-[3px_3px_0_#000] transition-all hover:-translate-y-1"
             >
               <span className="material-symbols-rounded text-lg">delete</span>
               Clear All
@@ -74,7 +83,7 @@ export default function HistoryPage() {
 
         {/* Stats Summary */}
         {stats && stats.totalQuizzes > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="rounded-2xl border-[3px] border-black bg-white p-4 shadow-[4px_4px_0_#000]">
               <div className="text-3xl font-black text-black">{stats.totalQuizzes}</div>
               <div className="text-sm font-bold text-gray-500">Quizzes Played</div>
@@ -96,13 +105,15 @@ export default function HistoryPage() {
 
         {/* History List */}
         {history.length === 0 ? (
-          <div className="rounded-3xl border-[3px] border-black bg-white p-12 shadow-[6px_6px_0_#000] text-center">
-            <span className="material-symbols-rounded text-6xl text-gray-300 mb-4">history</span>
-            <h2 className="text-2xl font-black text-gray-700 mb-2">No Quiz History</h2>
-            <p className="text-gray-500 font-medium mb-6">Start playing quizzes to see your history here!</p>
+          <div className="rounded-3xl border-[3px] border-black bg-white p-12 text-center shadow-[6px_6px_0_#000]">
+            <span className="material-symbols-rounded mb-4 text-6xl text-gray-300">history</span>
+            <h2 className="mb-2 text-2xl font-black text-gray-700">No Quiz History</h2>
+            <p className="mb-6 font-medium text-gray-500">
+              Start playing quizzes to see your history here!
+            </p>
             <button
               onClick={() => router.push('/dashboard')}
-              className="px-8 py-3 rounded-full border-[3px] border-black bg-accent font-bold shadow-[4px_4px_0_#000] hover:-translate-y-1 transition-all cursor-pointer"
+              className="bg-accent cursor-pointer rounded-full border-[3px] border-black px-8 py-3 font-bold shadow-[4px_4px_0_#000] transition-all hover:-translate-y-1"
             >
               Start a Quiz
             </button>
@@ -112,18 +123,24 @@ export default function HistoryPage() {
             {history.map((item) => (
               <div
                 key={item.id}
-                className="rounded-2xl border-[3px] border-black bg-white p-5 shadow-[4px_4px_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_#000] transition-all"
+                className="rounded-2xl border-[3px] border-black bg-white p-5 shadow-[4px_4px_0_#000] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0_#000]"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                   {/* Left: Category & Meta */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-black text-lg text-black">{item.category}</h3>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold border border-black capitalize ${getDifficultyColor(item.difficulty)}`}>
+                    <div className="mb-2 flex items-center gap-2">
+                      <h3 className="text-lg font-black text-black">{item.category}</h3>
+                      <span
+                        className={`rounded-full border border-black px-2 py-0.5 text-xs font-bold capitalize ${getDifficultyColor(item.difficulty)}`}
+                      >
                         {item.difficulty}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold border border-black bg-purple-100">
-                        {item.type === 'boolean' ? 'T/F' : item.type === 'multiple' ? 'MCQ' : 'Mixed'}
+                      <span className="rounded-full border border-black bg-purple-100 px-2 py-0.5 text-xs font-bold">
+                        {item.type === 'boolean'
+                          ? 'T/F'
+                          : item.type === 'multiple'
+                            ? 'MCQ'
+                            : 'Mixed'}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -142,17 +159,19 @@ export default function HistoryPage() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1 text-green-600 font-bold">
+                        <span className="flex items-center gap-1 font-bold text-green-600">
                           <span className="material-symbols-rounded text-lg">check_circle</span>
                           {item.correctAnswers}
                         </span>
-                        <span className="flex items-center gap-1 text-red-500 font-bold">
+                        <span className="flex items-center gap-1 font-bold text-red-500">
                           <span className="material-symbols-rounded text-lg">cancel</span>
                           {item.wrongAnswers}
                         </span>
                       </div>
                     </div>
-                    <div className={`px-4 py-2 rounded-xl border-2 border-black font-black text-xl ${getScoreColor(item.percentage)}`}>
+                    <div
+                      className={`rounded-xl border-2 border-black px-4 py-2 text-xl font-black ${getScoreColor(item.percentage)}`}
+                    >
                       {item.percentage}%
                     </div>
                   </div>
