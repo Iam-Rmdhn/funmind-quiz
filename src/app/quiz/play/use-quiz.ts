@@ -41,6 +41,7 @@ export interface UseQuizParams {
   difficulty: string | null;
   amount: string;
   resumeSession?: QuizSession | null;
+  paused?: boolean;
 }
 
 export interface UseQuizReturn {
@@ -70,20 +71,31 @@ const MULTIPLE_CHOICE_COLORS = ['bg-[#fef08a]', 'bg-[#fca5a5]', 'bg-[#86efac]', 
 // Colors for true/false (2 options)
 const BOOLEAN_COLORS = ['bg-[#86efac]', 'bg-[#fca5a5]'];
 
-// Default timer duration in seconds
-const TIMER_DURATION = 30;
+export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused }: UseQuizParams): UseQuizReturn {
+  // Calculate total duration based on question count
+  const getTotalTime = (questionCount: number): number => {
+    switch (questionCount) {
+      case 5: return 3 * 60;   // 3 minutes
+      case 10: return 7 * 60;  // 7 minutes
+      case 15: return 12 * 60; // 12 minutes
+      case 20: return 15 * 60;
+      default: return questionCount * 45;
+    }
+  };
 
-export function useQuiz({ categoryId, difficulty, amount, resumeSession }: UseQuizParams): UseQuizReturn {
   // Initialize state from resume session if available
   const [questions, setQuestions] = useState<QuizQuestion[]>(resumeSession?.questions || []);
   const [currentIndex, setCurrentIndex] = useState(resumeSession?.currentIndex || 0);
+  const [timeLeft, setTimeLeft] = useState(resumeSession?.timeLeft || getTotalTime(parseInt(amount))); 
   const [loading, setLoading] = useState(!resumeSession);
-  const [timeLeft, setTimeLeft] = useState(resumeSession?.timeLeft || TIMER_DURATION);
   const [score, setScore] = useState(resumeSession?.score || 0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
-  const [isResumed] = useState(!!resumeSession);
+  
+  // Derived state for isResumed
+  const isResumed = !!resumeSession;
+  
   const startedAt = useRef(resumeSession?.startedAt || new Date().toISOString());
 
   // Calculate earned XP (derived from score and difficulty)
@@ -137,20 +149,57 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession }: UseQu
       return;
     }
 
+    let isMounted = true;
+
     async function fetchQuestions() {
       try {
-        let apiUrl = `https://opentdb.com/api.php?amount=${amount}`;
-        
-        if (categoryId) {
-          apiUrl += `&category=${categoryId}`;
-        }
-        if (difficulty) {
-          apiUrl += `&difficulty=${difficulty}`;
+        const buildUrl = (diff: string | null) => {
+          let url = `https://opentdb.com/api.php?amount=${amount}`;
+          if (categoryId) url += `&category=${categoryId}`;
+          if (diff) url += `&difficulty=${diff}`;
+          return url;
+        };
+
+        const fetchWithRetry = async (url: string, retries = 2): Promise<{ response_code: number; results?: OpenTDBQuestion[] }> => {
+          try {
+            const res = await fetch(url);
+            
+            if (res.status === 429) {
+              if (retries > 0) {
+                await new Promise(r => setTimeout(r, 2000)); // Wait 2s
+                return fetchWithRetry(url, retries - 1);
+              }
+            }
+            
+            const data = await res.json();
+            
+            // Handle OpenTDB Rate Limit Code (5)
+            if (data.response_code === 5 && retries > 0) {
+              await new Promise(r => setTimeout(r, 2000));
+              return fetchWithRetry(url, retries - 1);
+            }
+
+            return data;
+          } catch (err) {
+            if (retries > 0) {
+              await new Promise(r => setTimeout(r, 1000));
+              return fetchWithRetry(url, retries - 1);
+            }
+            throw err;
+          }
+        };
+
+        // Initial fetch attempt
+        let data = await fetchWithRetry(buildUrl(difficulty));
+
+        // Fallback Strategy: If no results (Code 1), try removing difficulty constraint
+        if (data.response_code === 1 && difficulty) {
+          console.log("Not enough questions for specific difficulty, falling back to any difficulty...");
+          data = await fetchWithRetry(buildUrl(null));
         }
 
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-        
+        if (!isMounted) return;
+
         if (!data.results || !Array.isArray(data.results) || data.results.length === 0) {
           console.error("No questions returned from API", data);
           setLoading(false);
@@ -180,14 +229,22 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession }: UseQu
           };
         });
 
-        setQuestions(processedQuestions);
-        setLoading(false);
+        if (isMounted) {
+          setQuestions(processedQuestions);
+          // Set initial time based on actual loaded question count
+          setTimeLeft(getTotalTime(processedQuestions.length));
+          setLoading(false);
+        }
       } catch (error) {
-        console.error("Failed to fetch questions:", error);
-        setLoading(false);
+        if (isMounted) {
+          console.error("Failed to fetch questions:", error);
+          setLoading(false);
+        }
       }
     }
     fetchQuestions();
+
+    return () => { isMounted = false; };
   }, [amount, categoryId, difficulty, resumeSession]);
 
   // Handle advancing to next question
@@ -196,7 +253,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession }: UseQu
       setCurrentIndex((prev: number) => prev + 1);
       setSelectedAnswer(null);
       setIsAnswered(false);
-      setTimeLeft(TIMER_DURATION);
+      // Timer does NOT reset here anymore
     } else {
       setIsQuizFinished(true);
     }
@@ -204,30 +261,21 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession }: UseQu
 
   // Timer effect
   useEffect(() => {
-    if (loading || isAnswered || isQuizFinished) return;
+    // Only run timer if not paused, loading, or finished
+    if (paused || loading || isQuizFinished) return;
     
     const timer = setInterval(() => {
       setTimeLeft((prev: number) => {
         if (prev <= 1) {
-          // Time's up - schedule next question advancement
-          setTimeout(() => {
-            if (currentIndex < questions.length - 1) {
-              setCurrentIndex((p: number) => p + 1);
-              setSelectedAnswer(null);
-              setIsAnswered(false);
-              setTimeLeft(TIMER_DURATION);
-            } else {
-              setIsQuizFinished(true);
-            }
-          }, 0);
-          return TIMER_DURATION;
+          setIsQuizFinished(true);
+          return 0;
         }
         return prev - 1;
       });
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [loading, isAnswered, isQuizFinished, currentIndex, questions.length]);
+  }, [paused, loading, isQuizFinished]);
 
   // Save quiz result and clear session when finished
   const hasSavedResult = useRef(false);

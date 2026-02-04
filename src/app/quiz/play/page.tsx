@@ -18,31 +18,26 @@ import {
 
 import { Suspense } from 'react';
 
-function QuizContent() {
+// Separate component for the actual quiz game
+function QuizGame({ 
+  categoryId, 
+  difficulty, 
+  amount, 
+  resumeSession 
+}: { 
+  categoryId: string | null; 
+  difficulty: string | null; 
+  amount: string; 
+  resumeSession: QuizSession | null;
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // Get quiz parameters from URL
-  const categoryId = searchParams.get('category');
-  const difficulty = searchParams.get('difficulty');
-  const amount = searchParams.get('amount') || '10';
 
-  // Check for saved session on initial render
-  const [savedSession] = useState<QuizSession | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return getQuizSession();
-  });
-  
-  // Resume state management
-  const [showResumePrompt, setShowResumePrompt] = useState(!!savedSession);
-  const [resumeSession, setResumeSession] = useState<QuizSession | null>(null);
-
-  // Use custom hook for all quiz logic - ALWAYS call hooks unconditionally
   const quizData = useQuiz({ 
     categoryId: resumeSession?.categoryId ?? categoryId, 
     difficulty: resumeSession?.difficulty ?? difficulty, 
     amount: resumeSession?.amount ?? amount,
     resumeSession,
+    paused: false,
   });
 
   const {
@@ -63,29 +58,6 @@ function QuizContent() {
     getQuizSummary,
     decodeHtml,
   } = quizData;
-
-  // Handle resume decision
-  const handleResume = () => {
-    setResumeSession(savedSession);
-    setShowResumePrompt(false);
-  };
-
-  const handleStartFresh = () => {
-    clearQuizSession();
-    setResumeSession(null);
-    setShowResumePrompt(false);
-  };
-
-  // Show resume prompt if there's a saved session
-  if (showResumePrompt && savedSession) {
-    return (
-      <ResumeQuizModal
-        session={savedSession}
-        onResume={handleResume}
-        onStartFresh={handleStartFresh}
-      />
-    );
-  }
 
   // Loading state
   if (loading) {
@@ -176,6 +148,59 @@ function QuizContent() {
   );
 }
 
+function QuizContent() {
+  const searchParams = useSearchParams();
+  
+  // Get quiz parameters from URL
+  const categoryId = searchParams.get('category');
+  const difficulty = searchParams.get('difficulty');
+  const amount = searchParams.get('amount') || '10';
+
+  // Check for saved session on initial render
+  const [savedSession] = useState<QuizSession | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return getQuizSession();
+  });
+  
+  // Resume state management - 'decided' means user has made a choice
+  const [decision, setDecision] = useState<'pending' | 'resume' | 'fresh'>(
+    savedSession ? 'pending' : 'fresh'
+  );
+
+  // Handle resume decision
+  const handleResume = () => {
+    setDecision('resume');
+  };
+
+  const handleStartFresh = () => {
+    clearQuizSession();
+    setDecision('fresh');
+  };
+
+  // Show resume prompt if there's a saved session and user hasn't decided
+  if (decision === 'pending' && savedSession) {
+    return (
+      <ResumeQuizModal
+        session={savedSession}
+        onResume={handleResume}
+        onStartFresh={handleStartFresh}
+      />
+    );
+  }
+
+  // Render the quiz game with appropriate session
+  // Using key to force remount when decision changes
+  return (
+    <QuizGame
+      key={decision}
+      categoryId={categoryId}
+      difficulty={difficulty}
+      amount={amount}
+      resumeSession={decision === 'resume' ? savedSession : null}
+    />
+  );
+}
+
 export default function QuizPlayPage() {
   return (
     <Suspense fallback={<QuizLoading />}>
@@ -183,3 +208,4 @@ export default function QuizPlayPage() {
     </Suspense>
   );
 }
+

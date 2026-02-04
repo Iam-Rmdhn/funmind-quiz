@@ -34,9 +34,11 @@ export function ResumeQuizModal({ session, onResume, onStartFresh }: ResumeQuizM
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#f8fafc]">
       <div className="w-full max-w-md rounded-3xl border-[3px] border-black bg-white p-8 shadow-[8px_8px_0_#000] text-center">
-        <div className="text-6xl mb-4">📝</div>
+        <div className="text-6xl mb-4">
+          📝
+        </div>
         <h2 className="text-2xl font-black mb-2">Resume Quiz?</h2>
-        <p className="text-gray-500 font-medium mb-6">
+        <p className="text-gray-500 font-medium mb-6" suppressHydrationWarning>
           You have an unfinished quiz from {getSessionAge(session)}
         </p>
         

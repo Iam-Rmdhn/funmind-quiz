@@ -41,15 +41,61 @@ CREATE POLICY "Users can update their own profile"
 -- Function to automatically create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  new_username TEXT;
+  base_username TEXT;
+  google_name TEXT;
 BEGIN
-  INSERT INTO public.profiles (id, username, email)
+  -- Priority 1: Username from signup form
+  new_username := NEW.raw_user_meta_data->>'username';
+  
+  -- Priority 2: Full name or name from Google OAuth
+  IF new_username IS NULL OR new_username = '' THEN
+    google_name := COALESCE(
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'name'
+    );
+    
+    IF google_name IS NOT NULL AND google_name != '' THEN
+      -- Sanitize: lowercase, replace non-alphanumeric with underscore, limit length
+      base_username := lower(regexp_replace(google_name, '[^a-zA-Z0-9]+', '_', 'g'));
+      base_username := trim(both '_' from base_username);
+      base_username := substring(base_username from 1 for 20);
+      
+      IF base_username != '' THEN
+        new_username := base_username;
+      END IF;
+    END IF;
+  END IF;
+  
+  -- Priority 3: Fallback to user_ID
+  IF new_username IS NULL OR new_username = '' THEN
+    new_username := 'user_' || substr(NEW.id::text, 1, 8);
+  END IF;
+
+  -- Insert profile with conflict handling
+  INSERT INTO public.profiles (id, username, email, avatar_url)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'username', 'user_' || substr(NEW.id::text, 1, 8)),
-    NEW.email
+    new_username,
+    NEW.email,
+    NEW.raw_user_meta_data->>'avatar_url'
   )
   ON CONFLICT (id) DO NOTHING;
+  
   RETURN NEW;
+EXCEPTION
+  WHEN unique_violation THEN
+    -- If username already taken, add random suffix
+    INSERT INTO public.profiles (id, username, email, avatar_url)
+    VALUES (
+      NEW.id,
+      new_username || '_' || floor(random() * 9000 + 1000)::text,
+      NEW.email,
+      NEW.raw_user_meta_data->>'avatar_url'
+    )
+    ON CONFLICT (id) DO NOTHING;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

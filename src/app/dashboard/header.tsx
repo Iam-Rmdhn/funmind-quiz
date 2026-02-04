@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { formatXP, xpStore } from '@/lib/xp-system';
 import { useAuth } from '@/hooks/use-auth';
+import { signOut as serverSignOut } from '@/app/login/actions';
 
 
 const MENU_ITEMS = [
@@ -26,6 +27,11 @@ export default function DashboardHeader() {
     xpStore.getSnapshot,
     xpStore.getServerSnapshot
   );
+
+  // Helper to display username with proper capitalization
+  const displayName = profile?.username 
+    ? profile.username.charAt(0).toUpperCase() + profile.username.slice(1)
+    : 'User';
 
   const handleNavClick = (item: typeof MENU_ITEMS[0]) => {
     setActive(item.id);
@@ -72,8 +78,9 @@ export default function DashboardHeader() {
               <span className="font-black">{formatXP(userXP.totalXP)} XP</span>
             </div>
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" style={{ zIndex: isProfileOpen ? 9999 : 'auto' }}>
               <button
+                type="button"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="relative outline-none"
               >
@@ -90,7 +97,7 @@ export default function DashboardHeader() {
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <div className="absolute bottom-0 right-0 flex size-5 items-center justify-center rounded-full border-2 border-white bg-green-500 text-[10px] font-bold text-white z-10">
+                <div className="absolute bottom-0 right-0 flex size-5 items-center justify-center rounded-full border-2 border-white bg-green-500 text-[10px] font-bold text-white">
                   {userXP.level}
                 </div>
               </button>
@@ -98,21 +105,34 @@ export default function DashboardHeader() {
               {/* Dropdown Menu */}
               {isProfileOpen && (
                 <>
-                  {/* Backdrop to close on click outside */}
+                  {/* Backdrop - must be first so dropdown is on top */}
                   <div 
-                    className="fixed inset-0 z-40" 
+                    className="fixed inset-0 z-40"
                     onClick={() => setIsProfileOpen(false)} 
                   />
                   
-                  <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Dropdown content */}
+                  <div 
+                    className="absolute right-0 top-full mt-2 w-48 rounded-2xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] animate-in fade-in slide-in-from-top-2 duration-200 z-50"
+                  >
                     <div className="p-3 border-b-2 border-gray-200">
-                      <p className="font-bold text-sm truncate">{profile?.username || 'Guest'}</p>
+                      <p className="font-bold text-sm truncate">{displayName}</p>
                       <p className="text-xs text-gray-500 truncate">{profile?.email}</p>
                     </div>
                     <button
-                      onClick={async () => {
-                        await signOut();
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        signOut();
+                        serverSignOut();
+                        
                         setIsProfileOpen(false);
+                        
+                        localStorage.removeItem('user_xp');
+                        localStorage.removeItem('quiz_session');
+                        
                         window.location.href = '/login';
                       }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-left font-bold text-red-600 hover:bg-red-50 transition-colors rounded-b-xl cursor-pointer"
@@ -193,7 +213,7 @@ export default function DashboardHeader() {
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <span className="font-bold text-lg">{profile?.username || 'Guest'}</span>
+                <span className="font-bold text-lg">{displayName}</span>
               </div>
               <div className="flex items-center gap-2 rounded-full border-2 border-black bg-[#facc15] px-3 py-1">
                 <span className="material-symbols-rounded text-sm">bolt</span>
@@ -202,8 +222,25 @@ export default function DashboardHeader() {
             </div>
             <button
               onClick={async () => {
-                await signOut();
+                try {
+                  await signOut();
+                } catch (e) {
+                  console.error('Client signOut error:', e);
+                }
+                
+                try {
+                  await serverSignOut();
+                } catch (e) {
+                  console.error('Server signOut error:', e);
+                }
+                
                 setIsMobileMenuOpen(false);
+                
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('user_xp');
+                  localStorage.removeItem('quiz_session');
+                }
+                
                 window.location.href = '/login';
               }}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-red-200 bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors"

@@ -25,6 +25,9 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
   })
 
   if (error) {
+    if (error.message.includes('Invalid login credentials')) {
+      return { error: 'Invalid credentials. If you just signed up, please verify your email.' }
+    }
     return { error: error.message }
   }
 
@@ -57,12 +60,13 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
   if (existingUser) {
     return { error: 'Username is already taken' }
   }
+  const { getAuthCallbackUrl } = await import('@/lib/get-url')
 
-  // Sign up the user
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: getAuthCallbackUrl(),
       data: {
         username: username.trim(),
       }
@@ -70,11 +74,21 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
   })
 
   if (error) {
+    // Handle common Supabase errors with user-friendly messages
+    if (error.message.includes('rate limit') || error.message.includes('too many requests')) {
+      return { error: 'Too many signup attempts. Please wait a few minutes and try again.' }
+    }
+    if (error.message.includes('already registered') || error.message.includes('already exists')) {
+      return { error: 'An account with this email already exists. Try logging in instead.' }
+    }
     return { error: error.message }
   }
 
-  // Profile is created automatically by database trigger via handle_new_user function
-  // utilizing the username from raw_user_meta_data provided in signUp options.
+  if (data.user && !data.session) {
+    return { 
+      error: 'Account created! Please check your email to confirm your registration before logging in.', 
+    }
+  }
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
@@ -83,8 +97,7 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
-  revalidatePath('/', 'layout')
-  redirect('/login')
+  return { success: true }
 }
 
 export async function getUser() {
@@ -110,11 +123,12 @@ export async function getUserProfile() {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
+  const { getAuthCallbackUrl } = await import('@/lib/get-url')
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      redirectTo: getAuthCallbackUrl(),
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

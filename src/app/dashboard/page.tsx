@@ -8,11 +8,13 @@ import DailyChallengeCard from './daily-challenge-card';
 import HeroRobot from './hero-robot';
 import { QUIZ_CATEGORIES, Category } from '@/lib/quiz-categories';
 import QuizSettingsModal from './quiz-settings-modal';
+import { useAuth } from '@/hooks/use-auth';
 
 // Default 3 categories to show on dashboard
 const DEFAULT_CATEGORIES = QUIZ_CATEGORIES.slice(0, 3);
 
 export default function Dashboard() {
+  const { profile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
@@ -53,7 +55,7 @@ export default function Dashboard() {
               </div>
               
               <h1 className="text-xxl font-black leading-[1.2] max-line text-black md:text-6xl">
-                Ready to learn, <span className="bg-[#e9d5ff] px-2 text-black font-italic">Alex?</span>
+                Ready to learn, <span className="bg-[#e9d5ff] px-2 text-black font-italic">{profile?.username ? profile.username.charAt(0).toUpperCase() + profile.username.slice(1) : 'Friend'}?</span>
               </h1>
               
               <p className="text-lg font-medium text-gray-500">
