@@ -106,17 +106,17 @@ export function QuizTimer({ timeLeft }: QuizTimerProps) {
   const isUrgent = timeLeft <= 5;
   
   return (
-    <div className="flex flex-col items-center md:items-start relative z-20">
-      <div className={`relative flex flex-col items-center justify-center size-36 rounded-full border-[3px] border-black shadow-[4px_4px_0_#000] ${isUrgent ? 'bg-red-100 animate-pulse' : 'bg-[#fffbeb]'}`}>
+    <div className="flex flex-col items-center md:items-start relative z-20 w-full md:w-auto mb-6 md:mb-0">
+      <div className={`relative flex flex-col items-center justify-center size-24 md:size-36 rounded-full border-[3px] border-black shadow-[4px_4px_0_#000] ${isUrgent ? 'bg-red-100 animate-pulse' : 'bg-[#fffbeb]'}`}>
         {/* Notification Badge */}
         <div className="absolute top-0 -right-2 rotate-12 bg-pink-400 border-[3px] border-black rounded-xl p-1.5 shadow-sm">
-          <span className="material-symbols-rounded text-white text-lg font-bold">alarm</span>
+          <span className="material-symbols-rounded text-white text-sm md:text-lg font-bold">alarm</span>
         </div>
 
-        <span className={`material-symbols-rounded text-5xl mb-1 ${isUrgent ? 'text-red-600' : 'text-yellow-600'}`}>hourglass_top</span>
+        <span className={`material-symbols-rounded text-3xl md:text-5xl mb-1 ${isUrgent ? 'text-red-600' : 'text-yellow-600'}`}>hourglass_top</span>
         
-        <span className={`text-4xl font-black leading-none ${isUrgent ? 'text-red-600' : 'text-gray-700'}`}>{timeLeft}s</span>
-        <span className={`text-sm font-bold ${isUrgent ? 'text-red-600' : 'text-yellow-600'}`}>
+        <span className={`text-2xl md:text-4xl font-black leading-none ${isUrgent ? 'text-red-600' : 'text-gray-700'}`}>{timeLeft}s</span>
+        <span className={`text-xs md:text-sm font-bold ${isUrgent ? 'text-red-600' : 'text-yellow-600'}`}>
           {isUrgent ? 'Hurry!' : 'Time'}
         </span>
       </div>
@@ -172,34 +172,34 @@ interface QuizHeaderProps {
 
 export function QuizHeader({ difficulty, category, score, type, currentIndex, totalQuestions }: QuizHeaderProps) {
   return (
-    <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-      <div className="flex items-center gap-3">
+    <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
         {/* Difficulty Badge */}
-        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-white px-6 py-2 shadow-[4px_4px_0_#000]">
-          <span className="material-symbols-rounded text-yellow-400">stars</span>
-          <span className="font-black text-lg capitalize">{difficulty || 'Medium'}</span>
+        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-white px-4 md:px-6 py-2 shadow-[2px_2px_0_#000] md:shadow-[4px_4px_0_#000]">
+          <span className="material-symbols-rounded text-yellow-400 text-base md:text-2xl">stars</span>
+          <span className="font-black text-sm md:text-lg capitalize">{difficulty || 'Medium'}</span>
         </div>
         
         {/* Category Badge */}
-        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-blue-100 px-4 py-2 shadow-[3px_3px_0_#000]">
-          <span className="material-symbols-rounded text-blue-500 text-sm">category</span>
-          <span className="font-bold text-sm max-w-[150px] truncate">{category}</span>
+        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-blue-100 px-3 md:px-4 py-2 shadow-[2px_2px_0_#000] md:shadow-[3px_3px_0_#000]">
+          <span className="material-symbols-rounded text-blue-500 text-xs md:text-sm">category</span>
+          <span className="font-bold text-xs md:text-sm max-w-[120px] md:max-w-[150px] truncate">{category}</span>
         </div>
 
         {/* Score Badge */}
-        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-green-100 px-4 py-2 shadow-[3px_3px_0_#000]">
-          <span className="material-symbols-rounded text-green-600 text-sm">emoji_events</span>
-          <span className="font-bold text-sm">{score} pts</span>
+        <div className="flex items-center gap-2 rounded-full border-[3px] border-black bg-green-100 px-3 md:px-4 py-2 shadow-[2px_2px_0_#000] md:shadow-[3px_3px_0_#000]">
+          <span className="material-symbols-rounded text-green-600 text-xs md:text-sm">emoji_events</span>
+          <span className="font-bold text-xs md:text-sm">{score} pts</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end px-2">
         {/* Question Type Badge */}
-        <div className={`px-3 py-1 rounded-full border-2 border-black text-xs font-bold ${type === 'boolean' ? 'bg-purple-200' : 'bg-orange-200'}`}>
+        <div className={`px-3 py-1 rounded-full border-2 border-black text-[10px] md:text-xs font-bold ${type === 'boolean' ? 'bg-purple-200' : 'bg-orange-200'}`}>
           {type === 'boolean' ? 'True/False' : 'Multiple Choice'}
         </div>
-        <div className="font-black text-xl text-gray-800">
-          Question <span className="text-2xl">{currentIndex + 1}</span> <span className="text-gray-400 text-lg">/{totalQuestions}</span>
+        <div className="font-black text-lg md:text-xl text-gray-800">
+          Question <span className="text-xl md:text-2xl">{currentIndex + 1}</span> <span className="text-gray-400 text-base md:text-lg">/{totalQuestions}</span>
         </div>
       </div>
     </div>
@@ -214,12 +214,15 @@ interface QuizQuestionBubbleProps {
 
 export function QuizQuestionBubble({ question, decodeHtml }: QuizQuestionBubbleProps) {
   return (
-    <div className="relative w-full rounded-4xl border-[3px] border-black bg-white p-8 shadow-[6px_6px_0_#000] min-h-[160px] flex items-center justify-center text-center">
+    <div className="relative w-full rounded-3xl md:rounded-4xl border-[3px] border-black bg-white p-6 md:p-8 shadow-[4px_4px_0_#000] md:shadow-[6px_6px_0_#000] min-h-[120px] md:min-h-[160px] flex items-center justify-center text-center">
       {/* Speech Bubble Tail */}
-      <div className="absolute top-1/2 -left-4 -translate-y-1/2 w-0 h-0 border-t-15 border-t-transparent border-r-20 border-r-black border-b-15 border-b-transparent hidden md:block"></div>
-      <div className="absolute top-1/2 -left-[13px] -translate-y-1/2 w-0 h-0 border-t-12 border-t-transparent border-r-16 border-r-white border-b-12 border-b-transparent hidden md:block"></div>
+      <div className="absolute top-0 -translate-y-[98%] left-1/2 -translate-x-1/2 w-0 h-0 border-l-15px border-l-transparent border-b-20px border-b-black border-r-15px border-r-transparent md:hidden"></div>
+      <div className="absolute top-0 -translate-y-[98%] left-1/2 -translate-x-1/2 w-0 h-0 border-l-12px border-l-transparent border-b-16px border-b-white border-r-12px border-r-transparent md:hidden mt-[3px]"></div>
 
-      <h2 className="text-2xl md:text-3xl font-black text-gray-800 leading-snug">
+      <div className="absolute top-1/2 -left-4 -translate-y-1/2 w-0 h-0 border-t-15px border-t-transparent border-r-20px border-r-black border-b-15px border-b-transparent hidden md:block"></div>
+      <div className="absolute top-1/2 -left-[13px] -translate-y-1/2 w-0 h-0 border-t-12px border-t-transparent border-r-16px border-r-white border-b-12px border-b-transparent hidden md:block"></div>
+
+      <h2 className="text-lg md:text-3xl font-black text-gray-800 leading-snug">
         {decodeHtml(question)}
       </h2>
     </div>

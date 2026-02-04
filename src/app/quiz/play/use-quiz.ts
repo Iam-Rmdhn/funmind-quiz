@@ -68,16 +68,15 @@ export interface UseQuizReturn {
 
 // Colors for multiple choice (4 options)
 const MULTIPLE_CHOICE_COLORS = ['bg-[#fef08a]', 'bg-[#fca5a5]', 'bg-[#86efac]', 'bg-[#fdba74]'];
-// Colors for true/false (2 options)
 const BOOLEAN_COLORS = ['bg-[#86efac]', 'bg-[#fca5a5]'];
 
 export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused }: UseQuizParams): UseQuizReturn {
-  // Calculate total duration based on question count
+  // total duration based on question count
   const getTotalTime = (questionCount: number): number => {
     switch (questionCount) {
-      case 5: return 3 * 60;   // 3 minutes
-      case 10: return 7 * 60;  // 7 minutes
-      case 15: return 12 * 60; // 12 minutes
+      case 5: return 3 * 60;  
+      case 10: return 7 * 60;  
+      case 15: return 12 * 60;
       case 20: return 15 * 60;
       default: return questionCount * 45;
     }
@@ -92,9 +91,10 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   
-  // Derived state for isResumed
-  const isResumed = !!resumeSession;
+  // Derived state for isResumed (only show if we haven't advanced past the resumed point)
+  const isResumed = !!resumeSession && currentIndex === resumeSession.currentIndex;
   
   const startedAt = useRef(resumeSession?.startedAt || new Date().toISOString());
 
@@ -121,14 +121,47 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
     }
   }, [questions, currentIndex, score, timeLeft, isQuizFinished, isAnswered, categoryId, difficulty, amount]);
 
-  // Save session on beforeunload
+  // Save session on page unload/hide and track page visibility for timer
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleSaveSession = () => {
       saveCurrentSession();
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    // Desktop: beforeunload fires when closing tab/window
+    window.addEventListener('beforeunload', handleSaveSession);
+    
+    // Mobile/Desktop: visibilitychange fires when switching apps or tabs
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveCurrentSession();
+        setIsPageVisible(false);
+      } else {
+        setIsPageVisible(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Mobile: pagehide is more reliable than beforeunload on iOS Safari
+    window.addEventListener('pagehide', handleSaveSession);
+    
+    // Additional: blur/focus events for when user taps outside the browser
+    const handleBlur = () => {
+      saveCurrentSession();
+      setIsPageVisible(false);
+    };
+    const handleFocus = () => {
+      setIsPageVisible(true);
+    };
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleSaveSession);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handleSaveSession);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [saveCurrentSession]);
 
   // Also save periodically (every 5 seconds)
@@ -145,7 +178,6 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
   // Fetch questions on mount (skip if resuming)
   useEffect(() => {
     if (resumeSession) {
-      // Already have questions from session
       return;
     }
 
@@ -166,7 +198,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
             
             if (res.status === 429) {
               if (retries > 0) {
-                await new Promise(r => setTimeout(r, 2000)); // Wait 2s
+                await new Promise(r => setTimeout(r, 2000));
                 return fetchWithRetry(url, retries - 1);
               }
             }
@@ -261,8 +293,8 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
 
   // Timer effect
   useEffect(() => {
-    // Only run timer if not paused, loading, or finished
-    if (paused || loading || isQuizFinished) return;
+    // Only run timer if page is visible, not paused, not loading, and not finished
+    if (!isPageVisible || paused || loading || isQuizFinished) return;
     
     const timer = setInterval(() => {
       setTimeLeft((prev: number) => {
@@ -275,7 +307,7 @@ export function useQuiz({ categoryId, difficulty, amount, resumeSession, paused 
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [paused, loading, isQuizFinished]);
+  }, [isPageVisible, paused, loading, isQuizFinished]);
 
   // Save quiz result and clear session when finished
   const hasSavedResult = useRef(false);

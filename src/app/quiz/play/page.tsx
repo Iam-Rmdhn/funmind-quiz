@@ -97,7 +97,7 @@ function QuizGame({
       <QuizProgressBar progress={progress} />
 
       {/* Main Game Area */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 relative">
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 md:gap-8 relative">
         
         {/* Left: Timer */}
         <QuizTimer timeLeft={timeLeft} />

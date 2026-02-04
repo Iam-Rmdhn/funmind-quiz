@@ -1,5 +1,3 @@
-// Quiz History Types and Utilities
-
 export interface QuizHistoryItem {
   id: string;
   date: string;
@@ -48,10 +46,8 @@ export function saveQuizResult(result: Omit<QuizHistoryItem, 'id' | 'date'>): vo
       date: new Date().toISOString(),
     };
     
-    // Add new item at the beginning
     history.unshift(newItem);
     
-    // Keep only the last MAX_HISTORY_ITEMS
     const trimmedHistory = history.slice(0, MAX_HISTORY_ITEMS);
     
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));

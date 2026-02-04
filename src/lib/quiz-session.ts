@@ -1,5 +1,3 @@
-// Quiz Session Storage for Resume Feature
-
 export interface QuizSession {
   // Quiz parameters
   categoryId: string | null;
@@ -59,7 +57,6 @@ export function getQuizSession(): QuizSession | null {
     
     const session = JSON.parse(stored) as QuizSession;
     
-    // Check if session is too old (more than 24 hours)
     const savedAt = new Date(session.savedAt);
     const now = new Date();
     const hoursDiff = (now.getTime() - savedAt.getTime()) / (1000 * 60 * 60);

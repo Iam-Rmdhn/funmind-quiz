@@ -1,6 +1,4 @@
 -- Create profiles table for storing user information
--- Run this in your Supabase SQL Editor (https://app.supabase.com/project/YOUR_PROJECT/sql)
-
 -- Create the profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
