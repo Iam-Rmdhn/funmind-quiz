@@ -16,7 +16,9 @@ import {
   ResumeQuizModal,
 } from './components';
 
-export default function QuizPlayPage() {
+import { Suspense } from 'react';
+
+function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -171,5 +173,13 @@ export default function QuizPlayPage() {
       />
 
     </div>
+  );
+}
+
+export default function QuizPlayPage() {
+  return (
+    <Suspense fallback={<QuizLoading />}>
+      <QuizContent />
+    </Suspense>
   );
 }

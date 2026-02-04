@@ -71,6 +71,9 @@ export function useAuth() {
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('user_xp')
+    }
   }
 
   const updateProfile = async (updates: Partial<UserProfile>) => {

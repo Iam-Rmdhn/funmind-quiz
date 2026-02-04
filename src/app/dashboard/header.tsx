@@ -18,6 +18,7 @@ export default function DashboardHeader() {
   const router = useRouter();
   const { profile, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [active, setActive] = useState('home');
   
   const userXP = useSyncExternalStore(
@@ -70,40 +71,58 @@ export default function DashboardHeader() {
               <span className="material-symbols-rounded text-[#facc15]">bolt</span>
               <span className="font-black">{formatXP(userXP.totalXP)} XP</span>
             </div>
-            <div className="relative group">
-              <Avatar className="size-12 border-[3px] border-black bg-yellow-200 cursor-pointer">
-                {profile?.avatar_url ? (
-                  <AvatarImage 
-                    src={profile.avatar_url} 
-                    alt={profile?.username || 'Profile'}
-                    className="object-cover"
-                  />
-                ) : (
-                  <AvatarFallback className="bg-yellow-200 font-bold text-lg">
-                    {profile?.username?.charAt(0).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div className="absolute bottom-0 right-0 flex size-5 items-center justify-center rounded-full border-2 border-white bg-green-500 text-[10px] font-bold text-white z-10">
-                {userXP.level}
-              </div>
-              {/* Dropdown Menu */}
-              <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 absolute right-0 top-full mt-2 w-48 rounded-2xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] transition-all z-50">
-                <div className="p-3 border-b-2 border-gray-200">
-                  <p className="font-bold text-sm truncate">{profile?.username || 'Guest'}</p>
-                  <p className="text-xs text-gray-500 truncate">{profile?.email}</p>
+            {/* Profile Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="relative outline-none"
+              >
+                <Avatar className="size-12 border-[3px] border-black bg-yellow-200 cursor-pointer hover:scale-105 transition-transform">
+                  {profile?.avatar_url ? (
+                    <AvatarImage 
+                      src={profile.avatar_url} 
+                      alt={profile?.username || 'Profile'}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-yellow-200 font-bold text-lg">
+                      {profile?.username?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="absolute bottom-0 right-0 flex size-5 items-center justify-center rounded-full border-2 border-white bg-green-500 text-[10px] font-bold text-white z-10">
+                  {userXP.level}
                 </div>
-                <button
-                  onClick={async () => {
-                    await signOut();
-                    window.location.href = '/login';
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-left font-bold text-red-600 hover:bg-red-50 transition-colors rounded-b-xl"
-                >
-                  <span className="material-symbols-rounded">logout</span>
-                  Sign Out
-                </button>
-              </div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileOpen && (
+                <>
+                  {/* Backdrop to close on click outside */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsProfileOpen(false)} 
+                  />
+                  
+                  <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl border-[3px] border-black bg-white shadow-[4px_4px_0_#000] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-3 border-b-2 border-gray-200">
+                      <p className="font-bold text-sm truncate">{profile?.username || 'Guest'}</p>
+                      <p className="text-xs text-gray-500 truncate">{profile?.email}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        await signOut();
+                        setIsProfileOpen(false);
+                        window.location.href = '/login';
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-left font-bold text-red-600 hover:bg-red-50 transition-colors rounded-b-xl cursor-pointer"
+                    >
+                      <span className="material-symbols-rounded">logout</span>
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
