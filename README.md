@@ -18,7 +18,7 @@ Berikut adalah pemetaan antara kriteria yang diminta dengan implementasi dalam p
 | 1.f | Satu Soal per Halaman     | ✅     | Auto-advance setelah jawaban dipilih (1.5 detik delay)                    |
 | 1.g | Hasil Pengerjaan          | ✅     | Modal menampilkan benar/salah/persentase + earned XP                      |
 | 1.h | Resume Mechanism          | ✅     | LocalStorage dengan modal konfirmasi resume + auto-save setiap 5 detik    |
-| 1.i | Upload ke GitHub          | ✅     | [Repository Link]                                                         |
+| 1.i | Upload ke GitHub          | ✅     | https://github.com/Iam-Rmdhn/funmind-quiz.git                                                         |
 
 ### ⭐ Fitur Tambahan (Bonus)
 
@@ -373,10 +373,10 @@ https://your-domain.vercel.app/auth/callback
 - [ ] Responsive di mobile
 - [ ] Logout & re-login
 
-## 👨‍💻 Developer
+## 👨💻 Developer
 
-**Name**: [Ilham Ramadhan]  
-**Email**: [ilhamztr016@gmail.com]  
+**Name**: Ilham Ramadhan
+**Email**: ilhamztr016@gmail.com
 **GitHub**: [iam-rmdhn](https://github.com/iam-rmdhn)
 
 ## 📄 License
@@ -391,5 +391,3 @@ This project is created for interview assessment purposes.
 - **Vercel**: Hosting platform
 
 ---
-
-**Built with ❤️ using Next.js 16, React 19, and Supabase**
