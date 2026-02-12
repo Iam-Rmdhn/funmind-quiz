@@ -46,7 +46,7 @@ export function ResumeQuizModal({ session, onResume, onStartFresh }: ResumeQuizM
         <div className="mb-6 rounded-2xl border-2 border-black bg-gray-50 p-4 text-left">
           <div className="mb-3 flex items-center justify-between">
             <span className="font-bold text-gray-700">Category</span>
-            <span className="max-w-[180px] truncate text-sm font-black">
+            <span className="max-w-45 truncate text-sm font-black">
               {session.questions[0]?.category}
             </span>
           </div>
@@ -170,7 +170,7 @@ export function QuizProgressBar({ progress }: QuizProgressBarProps) {
               <span className="material-symbols-rounded text-2xl text-white">face</span>
             </div>
             {/* Downward arrow */}
-            <div className="-mt-[2px] h-0 w-0 border-t-8 border-r-8 border-l-8 border-t-gray-800 border-r-transparent border-l-transparent"></div>
+            <div className="-mt-0.5 h-0 w-0 border-t-8 border-r-8 border-l-8 border-t-gray-800 border-r-transparent border-l-transparent"></div>
           </div>
         </div>
       </div>
@@ -212,7 +212,7 @@ export function QuizHeader({
           <span className="material-symbols-rounded text-xs text-blue-500 md:text-sm">
             category
           </span>
-          <span className="max-w-[120px] truncate text-xs font-bold md:max-w-[150px] md:text-sm">
+          <span className="max-w-30 truncate text-xs font-bold md:max-w-37.5 md:text-sm">
             {category}
           </span>
         </div>
@@ -250,13 +250,13 @@ interface QuizQuestionBubbleProps {
 
 export function QuizQuestionBubble({ question, decodeHtml }: QuizQuestionBubbleProps) {
   return (
-    <div className="relative flex min-h-[120px] w-full items-center justify-center rounded-3xl border-[3px] border-black bg-white p-6 text-center shadow-[4px_4px_0_#000] md:min-h-[160px] md:rounded-4xl md:p-8 md:shadow-[6px_6px_0_#000]">
+    <div className="relative flex min-h-30 w-full items-center justify-center rounded-3xl border-[3px] border-black bg-white p-6 text-center shadow-[4px_4px_0_#000] md:min-h-40 md:rounded-4xl md:p-8 md:shadow-[6px_6px_0_#000]">
       {/* Speech Bubble Tail */}
       <div className="border-l-15px border-b-20px border-r-15px absolute top-0 left-1/2 h-0 w-0 -translate-x-1/2 -translate-y-[98%] border-r-transparent border-b-black border-l-transparent md:hidden"></div>
-      <div className="border-l-12px border-b-16px border-r-12px absolute top-0 left-1/2 mt-[3px] h-0 w-0 -translate-x-1/2 -translate-y-[98%] border-r-transparent border-b-white border-l-transparent md:hidden"></div>
+      <div className="border-l-12px border-b-16px border-r-12px absolute top-0 left-1/2 mt-0.75 h-0 w-0 -translate-x-1/2 -translate-y-[98%] border-r-transparent border-b-white border-l-transparent md:hidden"></div>
 
       <div className="border-t-15px border-r-20px border-b-15px absolute top-1/2 -left-4 hidden h-0 w-0 -translate-y-1/2 border-t-transparent border-r-black border-b-transparent md:block"></div>
-      <div className="border-t-12px border-r-16px border-b-12px absolute top-1/2 -left-[13px] hidden h-0 w-0 -translate-y-1/2 border-t-transparent border-r-white border-b-transparent md:block"></div>
+      <div className="border-t-12px border-r-16px border-b-12px absolute top-1/2 -left-3.25 hidden h-0 w-0 -translate-y-1/2 border-t-transparent border-r-white border-b-transparent md:block"></div>
 
       <h2 className="text-lg leading-snug font-black text-gray-800 md:text-3xl">
         {decodeHtml(question)}

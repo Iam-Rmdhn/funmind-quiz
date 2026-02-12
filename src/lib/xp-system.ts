@@ -19,7 +19,7 @@ export interface UserXP {
 
 // XP required to level up (increases each level)
 function getXPForLevel(level: number): number {
-  return 100 + (level - 1) * 50; // Level 1: 100, Level 2: 150, Level 3: 200, etc.
+  return 100 + (level - 1) * 50;
 }
 
 /**

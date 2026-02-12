@@ -172,7 +172,7 @@ export default function SignupPage() {
           {/* Submit Button */}
           <div className="pt-4">
             <button
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f59e0b] py-4 font-sans text-xl font-bold text-white shadow-[0px_6px_0px_#b45309] transition-all duration-100 hover:-translate-y-[2px] hover:bg-[#d97706] hover:shadow-[0px_8px_0px_#b45309] active:translate-y-[6px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[0px_6px_0px_#b45309]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#f59e0b] py-4 font-sans text-xl font-bold text-white shadow-[0px_6px_0px_#b45309] transition-all duration-100 hover:-translate-y-0.5 hover:bg-[#d97706] hover:shadow-[0px_8px_0px_#b45309] active:translate-y-1.5 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[0px_6px_0px_#b45309]"
               type="submit"
               disabled={isPending || isGoogleLoading}
             >
