@@ -380,17 +380,17 @@ https://your-domain.vercel.app/auth/callback
 
 ## 📝 Testing Checklist
 
-- [ ] Login dengan demo account (auto-fill credentials)
-- [ ] Pilih kategori & settings
-- [ ] Play quiz sampai selesai
-- [ ] Timer countdown & finish
-- [ ] Resume quiz (tutup tab & buka lagi)
-- [ ] View history
-- [ ] Check XP increase
-- [ ] View Stats page (profile, XP, best score, best category)
-- [ ] Navigate Dashboard → Stats (email & member since langsung muncul)
-- [ ] Responsive di mobile
-- [ ] Logout & re-login
+- [✓] Login dengan demo account (auto-fill credentials)
+- [✓] Pilih kategori & settings
+- [✓] Play quiz sampai selesai
+- [✓] Timer countdown & finish
+- [✓] Resume quiz (tutup tab & buka lagi)
+- [✓] View history
+- [✓] Check XP increase
+- [✓] View Stats page (profile, XP, best score, best category)
+- [✓] Navigate Dashboard → Stats (email & member since langsung muncul)
+- [✓] Responsive di mobile
+- [✓] Logout & re-login
 
 ## 👨💻 Developer
 
