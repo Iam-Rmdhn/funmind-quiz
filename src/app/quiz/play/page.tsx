@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuiz } from './use-quiz';
 import { getQuizSession, clearQuizSession, type QuizSession } from '@/lib/quiz-session';
@@ -151,26 +151,41 @@ function QuizContent() {
   const difficulty = searchParams.get('difficulty');
   const amount = searchParams.get('amount') || '10';
 
-  // Check for saved session on initial render
-  const [savedSession] = useState<QuizSession | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return getQuizSession();
-  });
-
-  // Resume state management - 'decided' means user has made a choice
-  const [decision, setDecision] = useState<'pending' | 'resume' | 'fresh'>(
-    savedSession ? 'pending' : 'fresh'
+  // Defer session check to avoid hydration mismatch (localStorage only on client)
+  type SessionState = {
+    session: QuizSession | null;
+    decision: 'loading' | 'pending' | 'resume' | 'fresh';
+  };
+  const [sessionState, dispatch] = useReducer(
+    (_: SessionState, action: SessionState) => action,
+    { session: null, decision: 'loading' }
   );
+
+  useEffect(() => {
+    const session = getQuizSession();
+    dispatch(session
+      ? { session, decision: 'pending' }
+      : { session: null, decision: 'fresh' }
+    );
+  }, []);
+
+  const savedSession = sessionState.session;
+  const decision = sessionState.decision;
 
   // Handle resume decision
   const handleResume = () => {
-    setDecision('resume');
+    dispatch({ session: savedSession, decision: 'resume' });
   };
 
   const handleStartFresh = () => {
     clearQuizSession();
-    setDecision('fresh');
+    dispatch({ session: null, decision: 'fresh' });
   };
+
+  // Show loading while checking for saved session
+  if (decision === 'loading') {
+    return <QuizLoading />;
+  }
 
   // Show resume prompt if there's a saved session and user hasn't decided
   if (decision === 'pending' && savedSession) {

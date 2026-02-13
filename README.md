@@ -10,7 +10,7 @@ Berikut adalah pemetaan antara kriteria yang diminta dengan implementasi dalam p
 
 | No  | Kriteria                  | Status | Implementasi                                                              |
 | --- | ------------------------- | ------ | ------------------------------------------------------------------------- |
-| 1.a | Fitur Login               | ✅     | Login dengan Email/Password + Google OAuth (Supabase Auth)                |
+| 1.a | Fitur Login               | ✅     | Login dengan Email/Password (Supabase Auth) - Demo Account tersedia       |
 | 1.b | API dari OpenTDB          | ✅     | Terintegrasi dengan `https://opentdb.com/` API                            |
 | 1.c | Jumlah & Tipe Soal Bebas  | ✅     | 5/10/15/20 soal, Multiple Choice & True/False, berbagai kategori          |
 | 1.d | Tampilan Total & Progress | ✅     | Header menampilkan "Question X/Y" + Progress Bar visual                   |
@@ -18,18 +18,19 @@ Berikut adalah pemetaan antara kriteria yang diminta dengan implementasi dalam p
 | 1.f | Satu Soal per Halaman     | ✅     | Auto-advance setelah jawaban dipilih (1.5 detik delay)                    |
 | 1.g | Hasil Pengerjaan          | ✅     | Modal menampilkan benar/salah/persentase + earned XP                      |
 | 1.h | Resume Mechanism          | ✅     | LocalStorage dengan modal konfirmasi resume + auto-save setiap 5 detik    |
-| 1.i | Upload ke GitHub          | ✅     | https://github.com/Iam-Rmdhn/funmind-quiz.git                                                         |
+| 1.i | Upload ke GitHub          | ✅     | https://github.com/Iam-Rmdhn/funmind-quiz.git                             |
 
 ### ⭐ Fitur Tambahan (Bonus)
 
 - **XP System**: Gamifikasi dengan level & XP berdasarkan difficulty
+- **Stats Page**: Halaman statistik lengkap (Profile, XP & Level, Best Score, Best Category, Summary)
 - **Quiz History**: Riwayat semua quiz yang pernah dikerjakan
 - **Responsive Design**: Mobile-first, support tablet & desktop
 - **Auto-Save Multi-Layer**: `beforeunload`, `visibilitychange`, `pagehide`, `blur`/`focus` events
 - **Smart Pause**: Timer otomatis pause saat tab tidak aktif (mobile/desktop)
 - **Multiple Categories**: 20+ kategori dari OpenTDB (Science, History, Sports, dll)
 - **Difficulty Selection**: Easy, Medium, Hard
-- **Quiz Stats Dashboard**: Total quiz, accuracy, favorite category
+- **Auth Context Provider**: Shared authentication state across all pages (no re-fetch on navigation)
 - **Session Expiry**: Auto-delete session setelah 24 jam
 
 ## 🚀 Tech Stack
@@ -44,7 +45,7 @@ Berikut adalah pemetaan antara kriteria yang diminta dengan implementasi dalam p
 
 ### Backend & Services
 
-- **Authentication**: Supabase Auth (Email/Password + Google OAuth)
+- **Authentication**: Supabase Auth (Email/Password) - Demo Account
 - **Database**: Supabase PostgreSQL
 - **Quiz API**: OpenTDB (Open Trivia Database)
 - **Storage**: LocalStorage for XP, History, Session Resume
@@ -131,14 +132,14 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 ```
 
-### 5. Setup Google OAuth (Opsional)
+### 5. Demo Account
 
-1. Buka [Google Cloud Console](https://console.cloud.google.com/)
-2. Buat OAuth 2.0 Client ID
-3. Tambahkan Authorized Redirect URIs:
-   - `http://localhost:3000/auth/callback` (development)
-   - `https://your-domain.vercel.app/auth/callback` (production)
-4. Copy Client ID & Secret ke Supabase Authentication Settings
+Aplikasi sudah dilengkapi dengan demo account yang siap digunakan:
+
+- **Email**: `demo1@funmind.com`
+- **Password**: `123456`
+
+Form login akan otomatis terisi dengan kredensial demo ini.
 
 ### 6. Jalankan Development Server
 
@@ -152,9 +153,9 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 
 ### 1. Authentication
 
-- **Sign Up**: Buat akun baru dengan email/password atau Google
-- **Login**: Masuk dengan kredensial yang sudah dibuat
-- Verifikasi email diperlukan untuk login dengan email/password
+- **Login**: Masuk menggunakan demo account yang sudah tersedia
+- Form login otomatis terisi dengan email dan password demo
+- Klik "Let's Go!" untuk langsung masuk ke Dashboard
 
 ### 2. Dashboard
 
@@ -199,6 +200,15 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 - Filter by category, difficulty, type
 - Clear history jika diperlukan
 
+### 8. Stats
+
+- Akses dari sidebar, header, atau navigasi ke `/stats`
+- **Profile Card**: Avatar, username, email (dari Supabase Auth), member since (dari `created_at` Auth)
+- **XP & Level**: Progress bar menuju level berikutnya dengan persentase
+- **Best Score**: Skor tertinggi dengan detail kategori, difficulty, correct answers
+- **Best Category**: Kategori paling sering dimainkan, average score, total correct
+- **Quick Summary**: Total quizzes, questions answered, total correct, average score
+
 ## 📁 Struktur Proyek
 
 ```
@@ -215,14 +225,19 @@ quiz_dot_intern/
 │   │   │   │   ├── use-quiz.ts     # Quiz logic hook
 │   │   │   │   └── page.tsx        # Main page
 │   │   │   └── select/     # Category selection
-│   │   └── layout.tsx      # Root layout
+│   │   ├── stats/          # Stats page (XP, Best Score, Best Category)
+│   │   │   └── page.tsx    # Stats page component
+│   │   ├── providers.tsx   # Client-side providers (AuthProvider wrapper)
+│   │   └── layout.tsx      # Root layout (wraps with Providers)
 │   ├── components/ui/      # Reusable UI components
-│   ├── hooks/              # Custom React hooks
+│   ├── hooks/
+│   │   └── use-auth.tsx    # Auth Context Provider & useAuth hook
 │   ├── lib/                # Utilities & libraries
 │   │   ├── quiz-history.ts # History management
 │   │   ├── quiz-session.ts # Resume mechanism
+│   │   ├── quiz-categories.ts # Category definitions
 │   │   ├── xp-system.ts    # XP & leveling
-│   │   └── supabase/       # Supabase client/server
+│   │   └── supabase/       # Supabase client/server/middleware
 │   └── utils/              # Helper functions
 ├── public/assets/          # Images & static files
 ├── .env.local              # Environment variables (gitignored)
@@ -231,17 +246,20 @@ quiz_dot_intern/
 
 ## 🔑 Fitur Utama & Implementasi
 
-### 1. Authentication System (`src/app/login/`)
+### 1. Authentication System (`src/hooks/use-auth.tsx` & `src/app/login/`)
 
-- **Email/Password**: Supabase Auth dengan validasi
-- **Google OAuth**: One-click login
+- **Email/Password**: Supabase Auth dengan demo account
+- **Auth Context Provider**: Shared state via `AuthProvider` di root layout
 - **Profile Sync**: Auto-create profile di database
-- **Protected Routes**: Middleware redirect untuk auth
+- **Protected Routes**: Middleware redirect untuk `/dashboard`, `/quiz`, `/history`, `/stats`
+- **No Re-fetch**: Auth data di-fetch sekali dan di-share ke semua halaman
 
 **File Penting**:
 
-- `actions.ts`: Server actions untuk login/signup
-- `login-form.tsx`: Form dengan validasi
+- `hooks/use-auth.tsx`: AuthProvider context & useAuth hook
+- `app/providers.tsx`: Client-side provider wrapper
+- `app/login/actions.ts`: Server actions untuk login/signOut
+- `app/login/login-form.tsx`: Form dengan demo credentials auto-fill
 
 ### 2. Quiz Engine (`src/app/quiz/play/use-quiz.ts`)
 
@@ -318,12 +336,12 @@ quiz_dot_intern/
 
 **Solusi**: Sudah dihandle dengan multiple events, pastikan browser support `visibilitychange`
 
-### Issue: Google OAuth redirect ke localhost
+### Issue: Email/Member Since tidak muncul di Stats
 
 **Solusi**:
 
-- Set `NEXT_PUBLIC_SITE_URL` di Vercel env vars
-- Update redirect URLs di Supabase & Google Console
+- Pastikan `AuthProvider` wrapper ada di root layout
+- Data diambil dari Supabase Auth user (bukan profile table)
 
 ### Issue: Questions tidak load
 
@@ -362,14 +380,15 @@ https://your-domain.vercel.app/auth/callback
 
 ## 📝 Testing Checklist
 
-- [ ] Login dengan email/password
-- [ ] Login dengan Google OAuth
+- [ ] Login dengan demo account (auto-fill credentials)
 - [ ] Pilih kategori & settings
 - [ ] Play quiz sampai selesai
 - [ ] Timer countdown & finish
-- [ ] Resume quiz (tutup browser & buka lagi)
+- [ ] Resume quiz (tutup tab & buka lagi)
 - [ ] View history
 - [ ] Check XP increase
+- [ ] View Stats page (profile, XP, best score, best category)
+- [ ] Navigate Dashboard → Stats (email & member since langsung muncul)
 - [ ] Responsive di mobile
 - [ ] Logout & re-login
 

@@ -10,7 +10,7 @@ import { signOut as serverSignOut } from '@/app/login/actions';
 
 const MENU_ITEMS = [
   { name: 'Home', icon: 'home', id: 'home', href: '/dashboard' },
-  { name: 'Stats', icon: 'bar_chart', id: 'stats', href: null },
+  { name: 'Stats', icon: 'bar_chart', id: 'stats', href: '/stats' },
   { name: 'History', icon: 'history', id: 'history', href: '/history' },
 ];
 

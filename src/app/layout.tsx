@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Quicksand } from 'next/font/google';
+import Providers from './providers';
 import './globals.css';
 
 const quicksand = Quicksand({
@@ -26,7 +27,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body className={`${quicksand.variable} antialiased`}>{children}</body>
+      <body className={`${quicksand.variable} antialiased`}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

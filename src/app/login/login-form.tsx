@@ -1,36 +1,21 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { useActionState, useState } from 'react';
-import { login, signInWithGoogle } from './actions';
+import { login } from './actions';
 
 interface AuthState {
   error: string | null;
 }
+
+const DEMO_EMAIL = 'demo1@funmind.com';
+const DEMO_PASSWORD = '123456';
 
 export default function LoginForm() {
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(login, {
     error: null,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const result = await signInWithGoogle();
-      if (result.url) {
-        window.location.href = result.url;
-      } else if (result.error) {
-        console.error('Google sign in error:', result.error);
-        setIsGoogleLoading(false);
-      }
-    } catch (error) {
-      console.error('Google sign in error:', error);
-      setIsGoogleLoading(false);
-    }
-  };
 
   return (
     <div className="w-full max-w-md space-y-8">
@@ -46,6 +31,17 @@ export default function LoginForm() {
           priority
         />
         <p className="pt-2 text-lg font-medium text-gray-500">Let&apos;s get your brain growing!</p>
+      </div>
+
+      {/* Demo Account Info */}
+      <div className="flex items-center gap-3 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4">
+        <span className="material-symbols-rounded text-2xl text-emerald-600">info</span>
+        <div>
+          <p className="font-sans text-sm font-bold text-emerald-800">Demo Account</p>
+          <p className="font-sans text-xs font-medium text-emerald-600">
+            Use the pre-filled credentials below to sign in.
+          </p>
+        </div>
       </div>
 
       {/* Form Section */}
@@ -68,8 +64,11 @@ export default function LoginForm() {
                 name="email"
                 type="email"
                 required
+                defaultValue={DEMO_EMAIL}
                 placeholder="user@example.com"
                 disabled={isPending}
+                aria-label="Email address"
+                tabIndex={1}
                 className="border-border focus:ring-primary/50 focus:border-border block w-full rounded-full border-2 bg-gray-50 py-4 pr-4 pl-11 text-lg font-semibold text-black placeholder-gray-400 transition-all duration-200 focus:ring-4 focus:outline-none disabled:opacity-50"
               />
             </div>
@@ -92,27 +91,24 @@ export default function LoginForm() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 required
+                defaultValue={DEMO_PASSWORD}
                 placeholder="********"
                 disabled={isPending}
+                aria-label="Password"
+                tabIndex={2}
                 className="border-border focus:ring-primary/50 focus:border-border block w-full rounded-full border-2 bg-gray-50 py-4 pr-12 pl-11 text-lg font-semibold text-black placeholder-gray-400 transition-all duration-200 focus:ring-4 focus:outline-none disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={4}
               >
                 <span className="material-symbols-rounded text-2xl">
                   {showPassword ? 'visibility' : 'visibility_off'}
                 </span>
               </button>
-            </div>
-            <div className="mt-2 flex justify-end">
-              <a
-                className="text-secondary hover:text-primary text-sm font-bold transition-colors"
-                href="#"
-              >
-                Forgot password?
-              </a>
             </div>
           </div>
         </div>
@@ -128,6 +124,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isPending}
+          tabIndex={3}
           className="group border-border text-foreground bg-primary relative flex w-full justify-center rounded-full border-2 px-3 py-3 text-lg font-extrabold shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:bg-[#82d60b] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none active:translate-x-[6px] active:translate-y-[6px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
         >
           {isPending ? (
@@ -144,56 +141,6 @@ export default function LoginForm() {
             </>
           )}
         </button>
-
-        {/* Divider */}
-        <div className="relative mt-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t-2 border-gray-200"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 font-bold text-gray-500">Or jump in with...</span>
-          </div>
-        </div>
-
-        {/* Social Login Buttons (Google Only) */}
-        <div className="grid grid-cols-1 gap-4">
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || isPending}
-            className="group flex w-full items-center justify-center gap-3 rounded-full border-2 border-gray-200 bg-white py-4 shadow-sm transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isGoogleLoading ? (
-              <>
-                <span className="size-5 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"></span>
-                <span className="font-bold text-gray-600">Connecting...</span>
-              </>
-            ) : (
-              <>
-                <Image
-                  src="https://www.google.com/favicon.ico"
-                  alt="Google"
-                  width={20}
-                  height={20}
-                />
-                <span className="font-bold text-gray-600 group-hover:text-black">
-                  Continue with Google
-                </span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Sign Up Link */}
-        <p className="mt-6 text-center text-base font-medium text-gray-600">
-          New here?{' '}
-          <Link
-            href="/signup"
-            className="text-secondary hover:text-primary font-bold transition-colors hover:underline"
-          >
-            Create a free account
-          </Link>
-        </p>
       </form>
     </div>
   );
